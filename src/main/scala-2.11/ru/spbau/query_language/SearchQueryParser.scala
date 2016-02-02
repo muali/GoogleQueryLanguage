@@ -49,7 +49,7 @@ object queries {
 
 }
 
-class SearchQueryParser(val input: ParserInput) extends Parser {
+class SearchQueryParser(val input: ParserInput) extends BasicParser {
 
   def SearchQuery = rule {((OrQuery | AndQuery) ~ WS.*) ~ EOI ~> (q => queries.SearchQuery(q))}
 
@@ -95,10 +95,6 @@ class SearchQueryParser(val input: ParserInput) extends Parser {
   def OrOperator = rule {(WS.+ ~ "OR" ~ WS.+) | (WS.* ~ '|' ~ WS.*)}
 
   def TestOr = rule {OrOperator ~ SearchSubQuery}
-
-  def WS = rule {quiet(anyOf(" \t \n").+)}
-
-  def Word = rule {CharPredicate.AlphaNum.+}
 
   def Float = rule {CharPredicate.Digit.+ ~ ('.' ~ CharPredicate.Digit.+).?}
 

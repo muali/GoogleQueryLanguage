@@ -74,17 +74,13 @@ object InfixHelper {
     case "choose" => Expressions.Choose(rhs, lhs)
   }
 
-  //TODO: replace with foldl
-  @tailrec
-  def foldExpression(lhs: Expressions.Expression, rhss: Seq[OperatorStorage]): Expressions.Expression = rhss match {
-    case Nil => lhs
-    case Seq(x) => makeInfix(lhs, x.rhs, x.op)
-    case Seq(x, xs@_*) => foldExpression(makeInfix(lhs, x.rhs, x.op), xs)
+  def foldExpression(z: Expressions.Expression, seq: Seq[OperatorStorage]): Expressions.Expression = {
+    seq.foldLeft(z)((lhs, os) => makeInfix(lhs, os.rhs, os.op))
   }
 
 }
 
-class CalculatorQueryParser(val input: ParserInput) extends Parser {
+class CalculatorQueryParser(val input: ParserInput) extends BasicParser {
   def Expression = rule {WS.* ~ (Conversion | Infix1) ~ EOI}
 
   def Conversion = rule {Infix1 ~ "in" ~ WS.* ~ Units ~> ((e, u) => Expressions.Conversion(e, u))}
@@ -144,5 +140,4 @@ class CalculatorQueryParser(val input: ParserInput) extends Parser {
     capture (CharPredicate.Digit.+ ~ ('.' ~ CharPredicate.Digit.*).?) ~ WS.* ~> (s => Expressions.Decimal(s))
   }
 
-  def WS = rule {quiet(anyOf(" \t \n").+)}
 }
